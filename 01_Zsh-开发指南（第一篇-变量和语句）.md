@@ -32,26 +32,29 @@
 
 ### Zsh 脚本样例
 
-可以通过一个例子直观感受下用 zsh 写的脚本。这是一个删除当前目录以及所有子目录下重复文件的脚本，通过 md5 判断文件是否相同（不严谨）。熟悉 bash 的读者可以尝试用 bash 完成相同的功能，然后对比一下代码（我之前写过一个 bash 版本的，不贴上来了），就能比较直观地感受到 bash 和 zsh 的区别了。
+可以通过一个例子直观感受下用 zsh 写的脚本。这是一个删除当前目录以及所有子目录下重复文件的脚本，通过 md5 判断文件是否相同（不考虑散列碰撞）。熟悉 bash 的读者可以尝试用 bash 完成相同的功能，然后对比一下代码（我之前写过一个 bash 版本的，不贴上来了），就能比较直观地感受到 bash 和 zsh 的区别了。
+
+高能预警，这个样例很复杂，建议跳过。
+
 
 ```
 #!/bin/zsh
 
-local files=("${(f)$(md5sum **/*(.D))}")
-local files_to_delete=()
-local -A md5s
+local files=("${(f)$(md5sum **/*(.D))}") # **/*是递归，(.D) 是两个Glob Qualifiers, `.`是普通文件，D大概是忽略路径开始的`.`，该命令文件数限制为`sysconf(_SC_ARG_MAX)`
+local files_to_delete=() # (f)是一个flag，按回车分隔， ()是数组声明，flag 和 Glob Qualifiers 的文档都在 http://zsh.sourceforge.net/Doc/Release/Expansion.html
+local -A md5s # `-a` 是数组，`-A` 是关联数组，或者理解成哈希表
 
-for i ($files) {
-    local md5=$i[1,32]
+for i ($files) { # 对于每个md5sum 文件名这一行
+    local md5=$i[1,32] # md5命令输出格式前面是md5sum, 后面是文件名，
 
-    if (($+md5s[$md5])) {
-        files_to_delete+=($i[35,-1])
+    if (($+md5s[$md5])) { # ${+name} 存在为0，否则为1，见manual
+        files_to_delete+=($i[35,-1]) # md5sum 中间有两个空格，文件名从35字节开始。
     } else {
         md5s[$md5]=1
     }
 }
 
-(($#files_to_delete)) && rm -v $files_to_delete
+(($#files_to_delete)) && rm -v $files_to_delete # `$#`是数组的size，`(( ))`是算术表达式
 ```
 
 ### 为什么要使用 shell 脚本语言

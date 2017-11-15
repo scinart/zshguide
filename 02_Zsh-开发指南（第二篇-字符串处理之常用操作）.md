@@ -73,12 +73,14 @@ abcdeabc
 % echo ${str##*b}
 cde
 
-# 删除右端匹配到的内容
+# 删除右端匹配到的内容，最大匹配
 % echo ${str%%d*}
 abc
 ```
 
 ### 字符串查找
+
+注：这里用的也是Globbing Flags，见 [Manual 14.8.4](http://zsh.sourceforge.net/Doc/Release/Expansion.html#Globbing-Flags)
 
 子字符串定位。
 
@@ -130,7 +132,7 @@ d
 aefabc
 
 # 删除匹配到的第一个
-% echo ${str/bc}
+% echo ${str/bc} # 注：为 echo ${str/bc/} 的省略格式 见 Manual 14.3
 aabc
 
 # 替换所有找到的
@@ -161,7 +163,7 @@ abcABCabcABC123
 % echo ${str:#ab}
 abc
 
-# 加 (M) 后效果反转
+# 加 (M) 后效果反转，注：如果str是数组，则${name:#pattern}会在数组中移除匹配的，加(M)移除不匹配的
 % echo ${(M)str:#ab}
 
 ```
@@ -211,6 +213,7 @@ a2345defg
 good
 ```
 
+注：这里`$+name`，或者`${+name}`，值为0或1，`(( ))`表示算术表达式，放在`(( ))`里正好。
 `(($+var))` 的用法也可以用来判断其他类型的变量，如果变量存在则返回真（0），否则返回假（1）。
 
 ### 字符串匹配判断
@@ -257,6 +260,8 @@ Abcde Abcde
 
 ### 目录文件名截取
 
+注：这个东西叫Modifiers, 见[14.1.4 Modifiers](http://zsh.sourceforge.net/Doc/Release/Expansion.html#Modifiers)
+
 ```
 % filepath=/a/b/c.x
 
@@ -278,6 +283,8 @@ x
 ```
 
 ### 字符串分隔
+
+注：见[15.2.3 Subscript Flags](http://zsh.sourceforge.net/Doc/Release/Parameters.html#Subscript-Flags)
 
 ```
 # 使用空格作为分隔符，多个空格也只算一个分隔符
@@ -320,6 +327,8 @@ for i (${(f)"$(<filename)"}) {
     echo $i
 }
 ```
+
+注：`(f)`是一个flag，按回车分隔
 
 读取文件指定行。
 
